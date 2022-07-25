@@ -1,0 +1,92 @@
+GET http://localhost:8000/api/v1/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTc0NzQ3NzgsImV4cCI6MTY1NzQ3NTY3OCwiYXVkIjoiNjJjOWQ3NzRjNGFjZWQ1NDdmZTczYjVhIiwiaXNzIjoiZXVyaXNrby10ZXN0LmNvbSJ9.7wEDsHrdFVZ344VAGFb1Xjhq7Dn40Z34f-TqAvSwccc
+
+###LOGIN  
+POST http://localhost:8000/api/v1/auth/login  
+content-type: application/json
+
+{
+   "email": "tggadda@filevino.com",
+  "password": "1234567"
+}
+
+  
+###REGISTER
+POST http://localhost:8000/api/v1/auth/register  
+content-type: application/json
+
+{    "name":"admin",
+    "email": "tggadda@filevino.com",
+    "password": "1234567",
+    "confirmPassword":"1234567"
+
+}
+
+### REFRESH-TOKEN
+POST http://localhost:8000/api/v1/auth/refresh-token 
+content-type: application/json
+  
+ { 
+   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTczMTA2NjMsImV4cCI6MTY4ODg2ODI2MywiYXVkIjoiNjJjODhkYzc2MWVjOTM0OGM2Nzc5M2ViIiwiaXNzIjoiZXVyaXNrby10ZXN0LmNvbSJ9.aupGLV2Ff94rAKorBSc6b6y9ckVKn3F9hEqznNfYesE" 
+ } 
+  
+###LOGOUT
+DELETE http://localhost:8000/api/v1/auth/logout 
+content-type: application/json
+  
+ { 
+   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTczMTA2OTAsImV4cCI6MTY4ODg2ODI5MCwiYXVkIjoiNjJjODhkYzc2MWVjOTM0OGM2Nzc5M2ViIiwiaXNzIjoiZXVyaXNrby10ZXN0LmNvbSJ9.HE3OLq1-xhAJPrnMLYb1mJixKj0AvkXEAefJS33feX8" 
+ }
+
+
+###
+POST http://localhost:8000/api/v1/auth/forgot-password
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTc0NzQ5NjYsImV4cCI6MTY1NzQ3NTg2NiwiYXVkIjoiNjJjYjBmOTU3YWJjODNiYzc0YTgwYzczIiwiaXNzIjoiZXVyaXNrby10ZXN0LmNvbSJ9.IysRX2CgRnKkl8PyEDaXd6Aj0vbgusyie80ELpVfAOM
+
+
+###
+PUT http://localhost:8000/api/v1/auth/reset-password/:id/:token
+content-type: application/json
+
+{
+  "password":"345678",
+  "confirmPassword":"345678"
+}
+
+### CATEGORIES
+GET http://localhost:8000/api/v1/get-Categories
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTc3OTY5MjAsImV4cCI6MTY1Nzc5NzgyMCwiYXVkIjoiNjJjZmVlNzVkZjhmNDQ2YmY5YWJmYTU2IiwiaXNzIjoiZXVyaXNrby10ZXN0LmNvbSJ9.MAEP2-OgrY_z1KHzPK5ZVoajkiHiq3LUQqlOwknnuWc
+
+
+###
+POST http://localhost:8000/api/v1/admin/add-Category
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTc3OTY5MjAsImV4cCI6MTY1Nzc5NzgyMCwiYXVkIjoiNjJjZmVlNzVkZjhmNDQ2YmY5YWJmYTU2IiwiaXNzIjoiZXVyaXNrby10ZXN0LmNvbSJ9.MAEP2-OgrY_z1KHzPK5ZVoajkiHiq3LUQqlOwknnuWc
+Content-Type: application/json
+
+{
+  "categoryName": "Politics"
+}
+
+###
+GET http://localhost:8000/api/v1/get-Categories
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTc3OTM4MzQsImV4cCI6MTY1Nzc5NDczNCwiYXVkIjoiNjJjOWQ3NzRjNGFjZWQ1NDdmZTczYjVhIiwiaXNzIjoiZXVyaXNrby10ZXN0LmNvbSJ9.xKh5-lsZnBsmB2NWZIiF0t7km7PwSM0CSS_z22a1r5Y
+
+###
+PUT http://localhost:8000/api/v1/admin/edit-Category/62cfece7f274ff37083e5dbd
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTc3OTQxNjYsImV4cCI6MTY1Nzc5NTA2NiwiYXVkIjoiNjJjZmVlNzVkZjhmNDQ2YmY5YWJmYTU2IiwiaXNzIjoiZXVyaXNrby10ZXN0LmNvbSJ9.FzUYBsg9jJ3odUdlRFhcShPqCygWpZL11Cm2AdHGRkE
+content-type: application/json
+
+{
+  "categoryName":"Business & Economics"
+}
+
+###
+DELETE  http://localhost:8000/api/v1/admin/delete-Category/62cff94f924c4b55b9e19690
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTc3OTk5OTksImV4cCI6MTY1NzgwMDg5OSwiYXVkIjoiNjJjZmVlNzVkZjhmNDQ2YmY5YWJmYTU2IiwiaXNzIjoiZXVyaXNrby10ZXN0LmNvbSJ9.x3dcIPrDC8p54WJeG-IM88lV0VmRkt0O-dsKHNOyE9A
+content-type: application/json
+
+{
+  "categoryName":"Politics"
+}
+
+
