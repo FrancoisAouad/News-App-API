@@ -10,34 +10,23 @@ export interface News {
 
 const newsSchema: Schema = new Schema({
     author: {
-        type: String,
-        index: true,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
     },
     title: {
         type: String,
-        index: true,
+        required: true,
     },
     content: {
         type: String,
-        index: true,
+        required: true,
     },
-    url: String,
-    newsImage: {
-        type: String,
-        index: true,
-    },
-    category: {
+    categoryID: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'category',
-        index: true,
     },
     views: {
         type: Number,
-        default: 0,
-    },
-    addToSlider: {
-        type: Boolean,
-        default: false,
     },
     comments: [
         {
@@ -50,6 +39,11 @@ const newsSchema: Schema = new Schema({
     ],
     addedAt: {
         type: Date,
+        default: Date.now(),
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now(),
     },
 });
 

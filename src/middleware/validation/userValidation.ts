@@ -6,8 +6,8 @@ export const loginSchema = Joi.object({
         .email()
         .lowercase()
         .required()
-        .error((errors) => {
-            errors.forEach((err) => {
+        .error((errors: any) => {
+            errors.forEach((err: any) => {
                 switch (err.type) {
                     case 'string.empty':
                         err.message = 'Enter Email';

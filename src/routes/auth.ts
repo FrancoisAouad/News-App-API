@@ -15,26 +15,23 @@ import { verifyAccessToken } from '../controllers/jwt/verifyJWT';
 
 const router = express.Router();
 
-router.get('/login');
 router.post('/login', login);
 
-router.get('/register');
 router.post('/register', register);
 
-router.post('/refresh-token', verifyAccessToken, refreshToken);
+router.post('/refreshtoken', verifyAccessToken, refreshToken);
 
 router.delete('/logout', verifyAccessToken, logout);
 
-router.get('/verify-email', verifyEmail);
+router.get('/verifyemail', verifyEmail);
 
 router.post(
-    '/forgot-password',
+    '/forgotpassword',
     verifyAccessToken,
     isEmailVerified,
     forgotPassword
 );
 
-router.get('/reset-password/:id/:token');
-router.put('/reset-password/:id/:token', resetPassword);
+router.put('/resetpassword/:id/:token', resetPassword);
 
 export default router;

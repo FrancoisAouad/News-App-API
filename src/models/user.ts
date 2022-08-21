@@ -1,8 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcrypt';
-// import { APIError } from '../../utils/errorHandlers/classes/apiError';
 
-// const Schema = mongoose.Schema;
 //user interface
 export interface User {
     name: string;
@@ -36,7 +34,7 @@ const UserSchema: Schema = new Schema({
     },
     createdAt: {
         type: Date,
-        default: new Date(),
+        default: Date.now(),
     },
     emailToken: {
         type: String,
