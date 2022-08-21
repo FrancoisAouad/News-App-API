@@ -25,9 +25,10 @@ export const register = async (
         //check if email already exists in database
         const exists = await User.findOne({ email: result.email });
         if (exists)
-            throw createError.Conflict(
-                `${result.email} has already been registered`
-            );
+            return res.status(409).json({
+                success: false,
+                message: `${exists.email} already exists.`,
+            });
 
         const user = new User(result);
 
@@ -37,11 +38,8 @@ export const register = async (
         //generate access and refresh token by saving calling the methods and saving in variables
         const accessToken = await setAccessToken(savedUser.id);
         const refreshToken = await setRefreshToken(savedUser.id);
-        //send jwt tokens to client
-        res.send({ accessToken, refreshToken });
 
         //ACTIVATION EMAIL TEMPLATE
-        console.log(user.email);
         nodemailer({
             from: process.env.NODEMAILER_USER,
             to: result.email,
@@ -54,7 +52,7 @@ export const register = async (
           <br/>
         <a href="http://${req.headers.host}/api/v1/auth/verify-email?token=${user.emailToken}">Click here to verify</a>`,
         });
-        console.log('reg email was sent');
+        res.send({ accessToken, refreshToken });
     } catch (error: any) {
         if (error.isJoi === true) error.status = 422;
         next(error);
@@ -90,8 +88,7 @@ export const login = async (
 
         res.send({ accessToken, refreshToken });
     } catch (error: any) {
-        if (error.isJoi === true)
-            return createError(400, 'Invalid username/password');
+        next(error);
     }
 };
 
@@ -104,7 +101,10 @@ export const refreshToken = async (
     try {
         const { refreshToken } = req.body;
         //throw error if refresh token isnt found
-        if (!refreshToken) throw createError.BadRequest();
+        if (!refreshToken)
+            return res
+                .status(403)
+                .json({ error: 'bad request', success: false });
         //else verify the current token
         const userId = await verifyRefreshToken(refreshToken);
         //if it passes then generate new tokens and send them to the user again
@@ -130,14 +130,13 @@ export const logout = async (
         const userId = await verifyRefreshToken(refreshToken);
         //delete refresh token to logout
         client.DEL(userId, (err: any, val: any) => {
-            if (err) {
-                console.log(err.message);
-                throw new createError.InternalServerError();
-            }
-            console.log(val);
-            res.sendStatus(204);
+            if (err)
+                return res
+                    .status(405)
+                    .json({ success: false, message: 'Server error' });
+
+            res.status(204);
         });
-        // console.log(`${email} logged out`);
     } catch (error: any) {
         next(error);
     }

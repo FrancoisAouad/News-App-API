@@ -1,4 +1,3 @@
-import createError from 'http-errors';
 import User from '../../models/user';
 import { resetPassSchema } from '../../middleware/validation/userValidation';
 import { setResetPasswordToken } from '../jwt/configJWT';
@@ -19,16 +18,18 @@ export const forgotPassword = async (
         //decoded token and parse it using atob
         const payload = JSON.parse(atob(authHeader!.split('.')[1]));
         //check payload for userID
-
         const id = payload.aud;
         //check if user exists
         const user = await User.findOne({ _id: id });
 
         if (!user) {
-            throw createError.Unauthorized(`Account not found`);
+            return res.status(401).json({
+                success: false,
+                error: 'Unauthorized',
+                message: 'Account not found',
+            });
         } else {
             const passwordToken = await setResetPasswordToken(user.id);
-            console.log(user.email);
             nodemailer({
                 from: process.env.NODEMAILER_USER,
                 to: user.email,
@@ -38,6 +39,10 @@ export const forgotPassword = async (
             <p>Your reset password link is available below.</p>
             <br/>
             <a href="http://${req.headers.host}/api/v1/auth/reset-password/${user.id}/${passwordToken}">Reset</a>`,
+            });
+            res.status(200).json({
+                success: true,
+                message: 'Reset password link has been to your email!',
             });
         }
     } catch (err) {
@@ -53,25 +58,23 @@ export const resetPassword = async (
 ) => {
     try {
         const { id, token } = req.params;
+        //getUserID
         const result = await resetPassSchema.validateAsync(req.body);
 
         const user = await User.findOne({ _id: id });
         if (user) {
             //verify that the password token is valid
-            const userId = await verifyResetPasswordToken(token);
+            await verifyResetPasswordToken(token);
             //salt and hash new password
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(result.password, salt);
             user.password = hashedPassword;
             //update password in database
-            const savedUser = await user.save();
+            await user.save();
 
-            return res
-                .status(201)
-                .json({ message: 'Password Successfully Updated.' });
+            res.status(201).json({ message: 'Password Successfully Updated.' });
         }
     } catch (error: any) {
-        if (error.isJoi === true) error.status = 422;
         next(error);
     }
 };

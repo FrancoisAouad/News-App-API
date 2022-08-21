@@ -1,133 +1,65 @@
 import News from '../../models/news';
 import { Request, Response, NextFunction } from 'express';
-// import { categorySchema } from '../../middleware/validation/categoryValidation';
-import base64 from 'crypto-js/enc-base64';
-import ImageToBase64 from 'image-to-base64';
 
-export const addNews = async (req, res: Response, next: NextFunction) => {
-    try {
-        console.log(req.files);
-        const { title, content, author, category, addToSlider } = req.body;
-
-        const base64Data = await ImageToBase64(req.files.newsImage.path);
-        // console.log("base64Data ", base64Data);
-
-        const news = await News.create({
-            title,
-            author,
-            content,
-            category,
-            addToSlider,
-            newsImage: `data:${req.files.newsImage.type};base64,${base64Data}`,
-            addedAt: Date.now(),
-        });
-
-        if (news) {
-            res.status(201).json({
-                success: true,
-                message: 'Successfully Added News',
-                data: news,
-            });
-        } else {
-            return res.status(400).json({
-                success: false,
-                msg: 'Invalid News Data',
-            });
-        }
-    } catch (error) {
-        next(error);
-
-        // res.status(500).json({
-        //     success: false,
-        //     msg: 'Internal error occured.',
-        //     data: new_category,
-        // });
-    }
-};
-
-export const getAllNews = async (
+////
+export const addNews = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
     try {
-        const size: any = req.params.pageSize;
-        const pageNo: any = req.params.pageNo;
+        const { title, content, author, category } = req.body;
 
-        var query = {
-            skip: 0,
-            limit: 0,
-        };
+        const news = await News.create({
+            title: title,
+            author: author,
+            content: content,
+            category: category,
+        });
 
-        if (pageNo < 0 || pageNo === 0) {
-            return res.status(401).json({
-                success: false,
-                msg: 'Invalid page number, should start with 1',
-            });
-        }
-
-        query.skip = size * (pageNo - 1);
-        query.limit = size;
-
-        const newsCount = await News.find({});
-
-        const news = await News.find({})
-            .sort('-addedAt')
-            .populate({ path: 'category', select: ['_id', 'categoryName'] })
-            .limit(Number(query.limit))
-            .skip(Number(query.skip));
-
-        res.json({
+        res.status(201).json({
             success: true,
-            count: newsCount.length,
+            message: 'News successfully added!',
             data: news,
         });
-    } catch (error) {
+    } catch (error: any) {
         next(error);
     }
 };
-
+//aggregation
 export const getNewsById = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
     try {
-        const news = await News.findById(req.params.newsId).populate({
-            path: 'category',
-            select: ['_id', 'categoryname'],
-        });
+        const news: any = await News.findOne({ _id: req.params.newsId });
+        if (!news)
+            return res.status(404).json({
+                success: false,
+                error: 'NotFound',
+                message: 'no such news found..',
+            });
+        news.views += 1;
+        await news.save();
+        const result = await News.aggregate([
+            {
+                $match: {
+                    _id: req.params.newsId,
+                },
+            },
+            //lookup users to comments
+        ]);
 
-        res.json({
+        res.status(200).json({
             success: true,
-            data: news,
+            data: result,
         });
-    } catch (error) {
+    } catch (error: any) {
         next(error);
     }
 };
-
-export const getSliderNews = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
-    try {
-        const news = await News.find({ addToSlider: true }).populate({
-            path: 'category',
-            select: ['_id', 'categoryName'],
-        });
-
-        res.json({
-            success: true,
-            count: news.length,
-            data: news,
-        });
-    } catch (error) {
-        next(error);
-    }
-};
-
+//aggregation group b ycategory id and push notes to array
 export const getNewsByCategory = async (
     req: Request,
     res: Response,
@@ -146,7 +78,7 @@ export const getNewsByCategory = async (
             count: news.length,
             data: news,
         });
-    } catch (error) {
+    } catch (error: any) {
         next(error);
     }
 };
@@ -157,50 +89,45 @@ export const deleteNewsById = async (
     next: NextFunction
 ) => {
     try {
-        const news = await News.findByIdAndDelete(req.params.newsId);
+        const deletedNews = await News.deleteOne({ _id: req.params.newsId });
+        if (!deletedNews)
+            return res.status(401).json({
+                success: false,
+                message: 'News not found..',
+            });
 
         res.status(201).json({
             success: true,
-            msg: 'Successfully Deleted',
-            data: news,
+            message: 'Successfully Deleted!',
         });
-
-        if (!news) {
-            return res.status(401).json({
-                success: false,
-                msg: 'News not found',
-            });
-        }
-    } catch (error) {
+    } catch (error: any) {
         next(error);
     }
 };
 
-// @desc Update News
 export const editNews = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
     try {
-        const news = await News.findByIdAndUpdate(req.params.newsId, req.body, {
-            new: true,
-            runValidators: true,
-        });
+        const { title, content, author } = req.body;
+        const news = await News.updateOne(
+            { _id: req.params.newsId },
+            { title: title, content: content, author: author }
+        );
+        if (!news)
+            return res.status(401).json({
+                success: false,
+                message: 'News not found',
+            });
 
         res.status(201).json({
             success: true,
-            msg: 'Successfully Updated',
+            message: 'Successfully Updated',
             data: news,
         });
-
-        if (!news) {
-            return res.status(401).json({
-                success: false,
-                msg: 'News not found',
-            });
-        }
-    } catch (error) {
+    } catch (error: any) {
         next(error);
     }
 };

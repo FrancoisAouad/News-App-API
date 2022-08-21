@@ -11,40 +11,35 @@ import {
     deleteNewsById,
     editNews,
 } from '../controllers/handlers/news';
-
+const categoryPath = 'category';
+const newsPath = 'news';
 const router = express.Router();
 //create categories
-router.post('/add-Category', verifyAccessToken, addCategory);
+router.post(`${categoryPath}`, verifyAccessToken, addCategory);
 //delete categories
 router.delete(
-    '/delete-Category/:categoryId',
+    `${categoryPath}/:categoryId`,
     verifyAccessToken,
     isAdmin,
     deleteCategory
 );
 
-// router.get('/getCategories', getAllCategories);
 //edit and update categories
 router.put(
-    '/edit-Category/:categoryId',
+    `${categoryPath}/:categoryId`,
     verifyAccessToken,
     isAdmin,
     editCategory
 );
 
-// router.route('/post/image/fb').post(imageUpload)
-router.post('/add-News', verifyAccessToken, isAdmin, addNews);
-// router.get('/getAllNews/:pageNo/:pageSize',getAllNews);
-// router.get('/getById/:newsId',getNewsById);
-// router.get('/getAllNews/slider',getSliderNews);
-// router.get('/getByCategory/:catId',getNewsByCategory);
+router.post(`${newsPath}`, verifyAccessToken, isAdmin, addNews);
 
 router.delete(
-    '/delete-News/:newsId',
+    `${newsPath}/:newsId`,
     verifyAccessToken,
     isAdmin,
     deleteNewsById
 );
-router.put('/edit-News/:newsId', verifyAccessToken, isAdmin, editNews);
+router.put(`${newsPath}/:newsId`, verifyAccessToken, isAdmin, editNews);
 
 export default router;

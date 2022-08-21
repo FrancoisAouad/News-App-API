@@ -1,8 +1,34 @@
-import Category from '../../models/category';
-import News from '../../models/news';
 import { Request, Response, NextFunction } from 'express';
-import { categorySchema } from '../../middleware/validation/categoryValidation';
+import Category from '../../../models/category';
+import News from '../../../models/news';
+import { categorySchema } from '../../../middleware/validation/categoryValidation';
 
+export const editCategory = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        //validate updated user input
+        const newCategory = await categorySchema.validateAsync(req.body);
+        //find document and update with newCategory
+        const editedCategory = await Category.updateOne({
+            categoryName: newCategory,
+        });
+        if (!editedCategory)
+            return res.status(404).json({
+                error: 'NotFound',
+                message: 'No such category found..',
+            });
+
+        res.status(200).json({
+            success: true,
+            message: 'Category Successfully updated',
+        });
+    } catch (error: any) {
+        next(error);
+    }
+};
 export const addCategory = async (
     req: Request,
     res: Response,
@@ -33,7 +59,6 @@ export const addCategory = async (
         next(err);
     }
 };
-
 export const deleteCategory = async (
     req: Request,
     res: Response,
@@ -74,87 +99,73 @@ export const deleteCategory = async (
         next(err);
     }
 };
-//aggregation
-export const getAllCategories = async (
+//---------------NEWS--------------//
+export const addNews = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
     try {
-        let params: any = [
-            {
-                $sort: { categoryName: 1, updatedDate: -1 },
-            },
-            {
-                $project: {
-                    _id: 1,
-                    categoryName: 1,
-                    created: '$createdDate',
-                    updated: '$updatedDate',
-                },
-            },
-        ];
+        const { title, content, author, category } = req.body;
 
-        if (req.body.search) {
-            let searchObj = {
-                $match: { categoryName: { $regex: /^${req.body.search}/ } },
-            };
-            params.push(searchObj);
-        }
-        const categories = await Category.aggregate(params);
-        res.status(200).json({ success: true, data: categories });
-    } catch (err) {
-        next(err);
-    }
-};
-export const getCategoryByID = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
-    try {
-        const { categoryId } = req.params;
-        const category = await Category.aggregate([
-            {
-                $match: {
-                    _id: categoryId,
-                },
-            },
-            {
-                $project: {
-                    _id: 1,
-                    categoryName: 1,
-                    created: '$createdDate',
-                    updated: '$updatedDate',
-                },
-            },
-        ]);
-        res.status(200).json({ success: true, data: category });
-    } catch (e) {
-        next(e);
-    }
-};
-export const editCategory = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
-    try {
-        //validate updated user input
-        const newCategory = await categorySchema.validateAsync(req.body);
-        //find document and update with newCategory
-        const editedCategory = await Category.updateOne({
-            categoryName: newCategory,
+        const news = await News.create({
+            title: title,
+            author: author,
+            content: content,
+            category: category,
         });
-        if (!editedCategory)
-            return res.status(404).json({
-                error: 'NotFound',
-                message: 'No such category found..',
+
+        res.status(201).json({
+            success: true,
+            message: 'News successfully added!',
+            data: news,
+        });
+    } catch (error: any) {
+        next(error);
+    }
+};
+export const deleteNewsById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const deletedNews = await News.deleteOne({ _id: req.params.newsId });
+        if (!deletedNews)
+            return res.status(401).json({
+                success: false,
+                message: 'News not found..',
             });
 
-        res.status(200).json({
+        res.status(201).json({
             success: true,
-            message: 'Category Successfully updated',
+            message: 'Successfully Deleted!',
+        });
+    } catch (error: any) {
+        next(error);
+    }
+};
+export const editNews = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { title, content, author } = req.body;
+        const news = await News.updateOne(
+            { _id: req.params.newsId },
+            { title: title, content: content, author: author }
+        );
+        if (!news)
+            return res.status(401).json({
+                success: false,
+                message: 'News not found',
+            });
+
+        res.status(201).json({
+            success: true,
+            message: 'Successfully Updated',
+            data: news,
         });
     } catch (error: any) {
         next(error);

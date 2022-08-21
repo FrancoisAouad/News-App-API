@@ -4,8 +4,9 @@ import Joi from '@hapi/joi';
 export const categorySchema = Joi.object({
     categoryName: Joi.string()
         .required()
-        .error((errors) => {
-            errors.forEach((err) => {
+        .lowercase()
+        .error((errors: any) => {
+            errors.forEach((err: any) => {
                 switch (err.type) {
                     case 'string.empty':
                         err.message = 'Enter Category Name';
