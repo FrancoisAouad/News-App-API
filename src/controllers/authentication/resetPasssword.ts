@@ -7,6 +7,7 @@ import bcrypt from 'bcrypt';
 import nodemailer from '../../utils/nodemailer';
 import atob from 'atob';
 //SEND FORGOT PASSWORD EMAIL
+//
 export const forgotPassword = async (
     req: Request,
     res: Response,
